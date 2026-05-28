@@ -1,0 +1,9 @@
+# Conservative profile: larger inflation keeps robot farther from obstacles.
+robot_radius: 0.12
+obstacle_range: 3.0
+raytrace_range: 3.5
+inflation_radius: 0.35
+cost_scaling_factor: 2.0
+map_type: costmap
+observation_sources: scan
+scan: {sensor_frame: laser_link, data_type: LaserScan, topic: scan, marking: true, clearing: true}

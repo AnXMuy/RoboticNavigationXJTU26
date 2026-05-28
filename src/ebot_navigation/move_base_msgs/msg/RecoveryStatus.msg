@@ -1,0 +1,4 @@
+std_msgs/Header header
+uint8 current_recovery_number
+uint8 total_number_of_recoveries
+string recovery_behavior_name

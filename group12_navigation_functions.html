@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>group12 ROS1 导航实验函数说明</title>
+  <style>
+    :root {
+      --bg: #f5f1e8;
+      --card: #fffdfa;
+      --ink: #1f2933;
+      --subtle: #52606d;
+      --accent: #0f766e;
+      --line: #d9cbb6;
+    }
+
+    body {
+      margin: 0;
+      font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+      background:
+        radial-gradient(circle at top right, rgba(15, 118, 110, 0.16), transparent 28%),
+        linear-gradient(180deg, #fbf7ef 0%, var(--bg) 100%);
+      color: var(--ink);
+    }
+
+    main {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 40px 20px 72px;
+    }
+
+    h1, h2 {
+      margin: 0 0 12px;
+      line-height: 1.2;
+    }
+
+    h1 { font-size: 2.1rem; }
+    h2 { font-size: 1.35rem; color: var(--accent); margin-top: 32px; }
+
+    p, li, td { line-height: 1.7; color: var(--ink); }
+    .meta, .note { color: var(--subtle); }
+
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 22px 24px;
+      box-shadow: 0 14px 32px rgba(31, 41, 51, 0.06);
+      margin-top: 18px;
+    }
+
+    code {
+      background: rgba(15, 118, 110, 0.08);
+      padding: 2px 6px;
+      border-radius: 6px;
+      font-family: "SFMono-Regular", Consolas, monospace;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+    }
+
+    th, td {
+      border: 1px solid var(--line);
+      padding: 12px 14px;
+      vertical-align: top;
+      text-align: left;
+    }
+
+    th { background: rgba(15, 118, 110, 0.08); }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>group12 ROS1 导航实验函数说明</h1>
+    <p class="meta">项目作者：group12；成员：Zixuan Jiang，Yiqin Wang，Jinsong Sun；时间：2026</p>
+    <p class="note">本文档对应当前目录下的 <code>src/</code>。当前仓库已覆盖实验 2~5 的实车与仿真双模式工作流，默认入口仍为实车模式。</p>
+
+    <section class="panel">
+      <h2>目录结构</h2>
+      <ul>
+        <li><code>src/ebot_base/turn_on_wheeltec_robot</code>：实车底盘串口驱动，接收 <code>/cmd_vel</code> 并发布底盘数据。</li>
+        <li><code>src/ebot_sensors/ydlidar_ros_driver</code>：实车雷达驱动，发布 <code>/scan</code>。</li>
+        <li><code>src/ebot_navigation/*</code>：导航算法包（含 <code>amcl</code>、<code>rf2o_laser_odometry</code> 与实验5新增 <code>move_base</code> 等包）。</li>
+        <li><code>src/ebot_bringup</code>：统一编排层，集中放置 launch 和参数配置。</li>
+        <li><code>src/robot_sim</code>：Gazebo 仿真模型与世界文件（实验 3~5 仿真链路）。</li>
+        <li><code>src/vehicle_sim</code>：RViz 轻量仿真包（实验 2 键控模型演示链路）。</li>
+      </ul>
+    </section>
+
+    <section class="panel">
+      <h2>关键启动文件职责</h2>
+      <table>
+        <thead>
+          <tr><th>文件</th><th>作用</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>ebot_bringup/launch/bringup.launch</code></td>
+            <td>统一入口。<code>mode:=real</code> 时启动实车底盘 + 静态 TF；<code>mode:=sim</code> 时启动 Gazebo 仿真环境（<code>robot_sim_gazebo.launch</code>）。</td>
+          </tr>
+          <tr>
+            <td><code>ebot_bringup/launch/my_lidar.launch</code></td>
+            <td>实车雷达入口，参数来自 <code>config/lidar/ydlidar_real.yaml</code>。</td>
+          </tr>
+          <tr>
+            <td><code>ebot_bringup/launch/slam_hector.launch</code></td>
+            <td>Hector 建图入口。按 <code>mode</code> 自动切换实车/仿真参数文件，支持 <code>resolution_profile:=baseline|fine|coarse</code>。</td>
+          </tr>
+          <tr>
+            <td><code>ebot_bringup/launch/slam_gmapping.launch</code></td>
+            <td>Gmapping 建图入口（实验3仿真主线），输出 <code>/map</code> 供保存地图。</td>
+          </tr>
+          <tr>
+            <td><code>ebot_bringup/launch/test_amcl.launch</code></td>
+            <td>定位总入口。加载地图与 AMCL；实车模式下额外启动 RF2O 提供 <code>odom -&gt; base_footprint</code>。</td>
+          </tr>
+          <tr>
+            <td><code>ebot_bringup/launch/nav02_path.launch</code></td>
+            <td>实验 5 路径规划入口，启动 <code>move_base</code> 并加载全局/局部代价地图与局部规划器参数。</td>
+          </tr>
+          <tr>
+            <td><code>ebot_bringup/launch/test_nav.launch</code></td>
+            <td>实验 5 总入口：先加载定位链路，再启动路径规划与避障链路；支持规划器与代价地图参数切换。</td>
+          </tr>
+          <tr>
+            <td><code>robot_sim/launch/robot_sim_gazebo.launch</code></td>
+            <td>启动 Gazebo、加载仿真世界与机器人模型，并发布仿真 <code>/odom</code>、<code>/scan</code> 输入。</td>
+          </tr>
+          <tr>
+            <td><code>vehicle_sim/launch/vehicle_sim_rviz.launch</code></td>
+            <td>实验 2 的 RViz 模型显示和简化里程计仿真入口。</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="panel">
+      <h2>参数文件职责</h2>
+      <ul>
+        <li><code>config/localization/amcl_real.yaml</code>、<code>amcl_sim.yaml</code>：AMCL 在实车/仿真两种里程计噪声条件下的独立配置。</li>
+        <li><code>config/slam/hector_mapping.yaml</code>、<code>hector_sim.yaml</code>：Hector 建图在实车/仿真下的 frame 与测距参数。</li>
+        <li><code>config/navigation/</code>：实验 5 的 move_base 参数集合，含 costmap 与局部规划器配置。</li>
+        <li><code>config/navigation/costmap_common_real.yaml</code> 与 <code>costmap_common_sim.yaml</code> 的主要差异是激光雷达 frame（<code>laser_link</code> vs <code>laser</code>）。</li>
+      </ul>
+    </section>
+
+    <section class="panel">
+      <h2>核心函数与节点</h2>
+      <table>
+        <thead>
+          <tr><th>函数 / 节点</th><th>所在文件</th><th>作用</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>turn_on_robot::Publish_Odom()</code></td>
+            <td><code>turn_on_wheeltec_robot/src/wheeltec_robot.cpp</code></td>
+            <td>发布实车底盘里程计和 TF，支持可配置的里程计父子坐标系。</td>
+          </tr>
+          <tr>
+            <td><code>rf2o_laser_odometry_node</code></td>
+            <td><code>rf2o_laser_odometry/src/CLaserOdometry2DNode.cpp</code></td>
+            <td>由激光数据估计实车里程计，给 AMCL 提供稳定的 <code>odom</code> 链路。</td>
+          </tr>
+          <tr>
+            <td><code>amcl</code></td>
+            <td><code>amcl/src/amcl_node.cpp</code></td>
+            <td>发布 <code>map -&gt; odom</code>，实现地图匹配定位。</td>
+          </tr>
+          <tr>
+            <td><code>move_base</code></td>
+            <td><code>move_base/src/move_base.cpp</code></td>
+            <td>实验 5 路径规划核心节点，融合地图、定位和雷达障碍物，输出 <code>/cmd_vel</code>。</td>
+          </tr>
+          <tr>
+            <td><code>vehicle_sim.py</code></td>
+            <td><code>vehicle_sim/scripts/vehicle_sim.py</code></td>
+            <td>简化仿真底盘节点，订阅 <code>/cmd_vel</code> 并发布 <code>/odom</code> 与 <code>odom -&gt; base_footprint</code>。</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="panel">
+      <h2>使用约定</h2>
+      <ul>
+        <li>默认命令不变：<code>roslaunch ebot_bringup bringup.launch</code> 仍按实车流程启动。</li>
+        <li>仿真模式显式指定：<code>roslaunch ebot_bringup bringup.launch mode:=sim</code>。</li>
+        <li>实验 5 导航总入口：<code>roslaunch ebot_bringup test_nav.launch mode:=real|sim</code>。</li>
+        <li>实验 5 进阶参数入口：<code>global_planner</code>、<code>local_planner</code>、<code>costmap_profile_file</code>。</li>
+      </ul>
+    </section>
+  </main>
+</body>
+</html>

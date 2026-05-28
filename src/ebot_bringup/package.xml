@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>ebot_bringup</name>
+  <version>0.2.0</version>
+  <description>Unified bringup package for real-robot and simulation workflows in the 2026 ROS1 navigation labs.</description>
+
+  <maintainer email="group12@example.com">Zixuan Jiang</maintainer>
+  <author email="group12@example.com">Zixuan Jiang</author>
+  <author email="group12@example.com">Yiqin Wang</author>
+  <author email="group12@example.com">Jinsong Sun</author>
+
+  <license>MIT</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <exec_depend>amcl</exec_depend>
+  <exec_depend>base_local_planner</exec_depend>
+  <exec_depend>clear_costmap_recovery</exec_depend>
+  <exec_depend>costmap_2d</exec_depend>
+  <exec_depend>dwa_local_planner</exec_depend>
+  <exec_depend>global_planner</exec_depend>
+  <exec_depend>hector_mapping</exec_depend>
+  <exec_depend>map_server</exec_depend>
+  <exec_depend>move_base</exec_depend>
+  <exec_depend>move_base_msgs</exec_depend>
+  <exec_depend>nav_core</exec_depend>
+  <exec_depend>navfn</exec_depend>
+  <exec_depend>rf2o_laser_odometry</exec_depend>
+  <exec_depend>robot_sim</exec_depend>
+  <exec_depend>rotate_recovery</exec_depend>
+  <exec_depend>tf2_sensor_msgs</exec_depend>
+  <exec_depend>tf2_ros</exec_depend>
+  <exec_depend>turn_on_wheeltec_robot</exec_depend>
+  <exec_depend>voxel_grid</exec_depend>
+  <exec_depend>ydlidar_ros_driver</exec_depend>
+</package>

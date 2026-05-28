@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>robot_sim</name>
+  <version>0.1.0</version>
+  <description>Gazebo simulation package used by Experiment 3-5 workflows.</description>
+
+  <maintainer email="group12@example.com">Zixuan Jiang</maintainer>
+  <author email="group12@example.com">Zixuan Jiang</author>
+  <author email="group12@example.com">Yiqin Wang</author>
+  <author email="group12@example.com">Jinsong Sun</author>
+
+  <license>MIT</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <depend>gazebo_plugins</depend>
+  <depend>gazebo_ros</depend>
+  <depend>robot_state_publisher</depend>
+  <depend>xacro</depend>
+
+  <exec_depend>joint_state_publisher</exec_depend>
+  <exec_depend>rviz</exec_depend>
+</package>

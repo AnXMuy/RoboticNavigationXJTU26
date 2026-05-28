@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<launch>
+  <arg name="mode" default="real"/>
+  <arg name="resolution_profile" default="baseline" doc="baseline|fine|coarse"/>
+
+  <arg name="real_baseline" default="$(find ebot_bringup)/config/slam/hector_mapping.yaml"/>
+  <arg name="real_fine" default="$(find ebot_bringup)/config/slam/hector_mapping_res_fine.yaml"/>
+  <arg name="real_coarse" default="$(find ebot_bringup)/config/slam/hector_mapping_res_coarse.yaml"/>
+
+  <arg name="sim_baseline" default="$(find ebot_bringup)/config/slam/hector_sim.yaml"/>
+  <arg name="sim_fine" default="$(find ebot_bringup)/config/slam/hector_sim_res_fine.yaml"/>
+  <arg name="sim_coarse" default="$(find ebot_bringup)/config/slam/hector_sim_res_coarse.yaml"/>
+
+  <arg name="profile_file"
+       default="$(eval (sim_fine if resolution_profile == 'fine' else (sim_coarse if resolution_profile == 'coarse' else sim_baseline)) if mode == 'sim' else (real_fine if resolution_profile == 'fine' else (real_coarse if resolution_profile == 'coarse' else real_baseline)))"/>
+
+  <!-- allow explicit file override -->
+  <arg name="config_file" default="$(arg profile_file)"/>
+
+  <node pkg="hector_mapping"
+        type="hector_mapping"
+        name="hector_mapping"
+        output="screen">
+    <rosparam command="load" file="$(arg config_file)"/>
+  </node>
+</launch>

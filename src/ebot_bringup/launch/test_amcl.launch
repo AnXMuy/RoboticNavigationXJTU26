@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<launch>
+  <arg name="map" default="nav.yaml"/>
+  <arg name="mode" default="real"/>
+  <arg name="amcl_profile" default="baseline"/>
+
+  <!-- Load the saved static map -->
+  <node name="map_server"
+        pkg="map_server"
+        type="map_server"
+        args="$(find ebot_bringup)/maps/$(arg map)"/>
+
+  <!-- Real robot uses RF2O to provide odom -> base_footprint -->
+  <include if="$(eval mode == 'real')" file="$(find ebot_bringup)/launch/nav01_rf2o.launch"/>
+
+  <!-- Run AMCL against the static map -->
+  <include file="$(find ebot_bringup)/launch/nav01_amcl.launch">
+    <arg name="mode" value="$(arg mode)"/>
+    <arg name="amcl_profile" value="$(arg amcl_profile)"/>
+  </include>
+</launch>

@@ -1,0 +1,55 @@
+<?xml version="1.0"?>
+<launch>
+  <arg name="mode" default="real" doc="Runtime mode: real or sim"/>
+  <arg name="use_sim_time" default="$(eval mode == 'sim')"/>
+
+  <!-- Real robot serial configuration -->
+  <arg name="base_port" default="/dev/serial/by-path/platform-3610000.usb-usb-0:2.4:1.0"/>
+  <arg name="base_baudrate" default="115200"/>
+
+  <!-- Keep wheel odometry isolated from navigation TF to avoid conflicts -->
+  <arg name="wheel_odom_frame_id" default="wheel_odom"/>
+  <arg name="wheel_robot_frame_id" default="wheel_base_footprint"/>
+  <arg name="wheel_odom_topic" default="wheel_odom_raw"/>
+
+  <arg name="smoother" default="false"/>
+  <arg name="use_FDI_IMU_GNSS" default="false"/>
+
+  <!-- Gazebo simulation arguments -->
+  <arg name="sim_paused" default="false"/>
+  <arg name="sim_gui" default="true"/>
+  <arg name="sim_headless" default="false"/>
+  <arg name="sim_world_name" default="$(find robot_sim)/worlds/box_house.world"/>
+  <arg name="sim_model" default="mycar"/>
+  <arg name="sim_rviz" default="false"/>
+
+  <param if="$(arg use_sim_time)" name="use_sim_time" value="true"/>
+
+  <group if="$(eval mode == 'real')">
+    <!-- Publish static transforms required by the real robot -->
+    <include file="$(find ebot_bringup)/launch/static_tf.launch"/>
+
+    <!-- Start the wheeltec base driver -->
+    <include file="$(find turn_on_wheeltec_robot)/launch/turn_on_wheeltec_robot.launch">
+      <arg name="smoother" value="$(arg smoother)"/>
+      <arg name="odom_frame_id" value="$(arg wheel_odom_frame_id)"/>
+      <arg name="robot_frame_id" value="$(arg wheel_robot_frame_id)"/>
+      <arg name="odom_topic" value="$(arg wheel_odom_topic)"/>
+      <arg name="usart_port_name" value="$(arg base_port)"/>
+      <arg name="serial_baud_rate" value="$(arg base_baudrate)"/>
+      <arg name="use_FDI_IMU_GNSS" value="$(arg use_FDI_IMU_GNSS)"/>
+    </include>
+  </group>
+
+  <group if="$(eval mode == 'sim')">
+    <include file="$(find robot_sim)/launch/robot_sim_gazebo.launch">
+      <arg name="use_sim_time" value="$(arg use_sim_time)"/>
+      <arg name="paused" value="$(arg sim_paused)"/>
+      <arg name="gui" value="$(arg sim_gui)"/>
+      <arg name="headless" value="$(arg sim_headless)"/>
+      <arg name="world_name" value="$(arg sim_world_name)"/>
+      <arg name="model" value="$(arg sim_model)"/>
+      <arg name="rviz" value="$(arg sim_rviz)"/>
+    </include>
+  </group>
+</launch>

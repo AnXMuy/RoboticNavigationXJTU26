@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<launch>
+  <arg name="use_gui" default="true"/>
+  <arg name="rviz" default="true"/>
+  <arg name="rviz_config" default="$(find vehicle_sim)/rviz/vehicle_sim.rviz"/>
+
+  <param name="robot_description"
+         command="$(find xacro)/xacro --inorder $(find vehicle_sim)/urdf/vehicle_top.urdf.xacro"/>
+
+  <node if="$(arg use_gui)"
+        pkg="joint_state_publisher_gui"
+        type="joint_state_publisher_gui"
+        name="joint_state_publisher_gui"
+        output="screen"/>
+
+  <node unless="$(arg use_gui)"
+        pkg="joint_state_publisher"
+        type="joint_state_publisher"
+        name="joint_state_publisher"
+        output="screen"/>
+
+  <node pkg="robot_state_publisher"
+        type="robot_state_publisher"
+        name="robot_state_publisher"
+        output="screen"/>
+
+  <node pkg="vehicle_sim"
+        type="vehicle_sim.py"
+        name="vehicle_sim_node"
+        output="screen"/>
+
+  <node if="$(arg rviz)"
+        pkg="rviz"
+        type="rviz"
+        name="rviz"
+        args="-d $(arg rviz_config)"/>
+</launch>
