@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>实验4 Cookbook - 实车定位（RF2O + AMCL）</title>
+  <style>
+    :root {
+      --bg: #f0f4fb;
+      --card: #ffffff;
+      --ink: #1f2b37;
+      --sub: #556272;
+      --line: #c7d2e1;
+      --accent: #2d4f86;
+      --accent-soft: #eaf0fb;
+      --warn: #a1451f;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      font-family: "PingFang SC", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+      background:
+        radial-gradient(circle at 100% 0%, rgba(45, 79, 134, 0.15), transparent 32%),
+        linear-gradient(180deg, #f9fbff 0%, var(--bg) 100%);
+    }
+    main { max-width: 1080px; margin: 0 auto; padding: 28px 16px 60px; }
+    h1, h2, h3 { margin: 0; line-height: 1.25; }
+    h1 { font-size: clamp(1.62rem, 3vw, 2.15rem); }
+    h2 { font-size: 1.28rem; color: var(--accent); margin-top: 24px; }
+    h3 { font-size: 1.06rem; color: var(--accent); margin-top: 13px; }
+    p, li { line-height: 1.72; }
+    .sub { color: var(--sub); margin-top: 8px; }
+    .panel {
+      margin-top: 14px;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 16px 18px;
+      box-shadow: 0 8px 22px rgba(33, 45, 66, 0.06);
+    }
+    .topnav { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 12px; }
+    .topnav a {
+      text-decoration: none;
+      color: #2f4d7c;
+      border: 1px solid #bfd0ea;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      padding: 6px 11px;
+      font-size: 0.9rem;
+    }
+    .step {
+      margin-top: 12px;
+      border: 1px dashed #b8c9e0;
+      border-radius: 10px;
+      padding: 12px;
+      background: #fbfcff;
+    }
+    .term {
+      display: inline-block;
+      border-radius: 6px;
+      padding: 2px 7px;
+      background: #eaf0fb;
+      color: #2f4d7c;
+      font-weight: 600;
+      font-size: 0.88rem;
+      margin-bottom: 8px;
+    }
+    code {
+      font-family: "SFMono-Regular", Consolas, Menlo, monospace;
+      background: #edf2fb;
+      border-radius: 5px;
+      padding: 2px 6px;
+    }
+    pre {
+      margin: 8px 0 0;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px 12px;
+      background: #fcfdff;
+      overflow: auto;
+      line-height: 1.5;
+    }
+    .warn { color: var(--warn); font-weight: 700; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    th, td {
+      border: 1px solid var(--line);
+      padding: 9px 10px;
+      text-align: left;
+      vertical-align: top;
+    }
+    th { background: #ebf1fc; }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="topnav">
+      <a href="./group12_navigation_functions.html">返回总索引</a>
+      <a href="./group12_exp03_mapping.html">上一实验：实验3</a>
+      <a href="./group12_exp05_navigation.html">下一实验：实验5</a>
+    </div>
+
+    <h1>实验4 Cookbook：实车定位（RF2O + AMCL）</h1>
+    <p class="sub">
+      对应指导书：<code>docs/实验指导书-实验4_定位实验.pdf</code>。
+      输入：实验3保存的地图；输出：稳定的 <code>map -&gt; odom -&gt; base_footprint</code> 定位链路。
+    </p>
+
+    <section class="panel">
+      <h2>1. 前置条件</h2>
+      <ul>
+        <li>地图文件存在：<code>src/ebot_bringup/maps/nav.yaml</code> 与 <code>nav.pgm</code>。</li>
+        <li>实验2链路通过：底盘与遥控正常。</li>
+        <li>实验3链路通过：雷达与建图正常。</li>
+      </ul>
+      <p class="warn">没有可用地图时，不要直接做实验4。</p>
+    </section>
+
+    <section class="panel">
+      <h2>2. 目标与验收</h2>
+      <table>
+        <thead>
+          <tr><th>检查项</th><th>通过标准</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>AMCL 粒子收敛</td><td>初始分散，几次移动后明显收敛到机器人附近。</td></tr>
+          <tr><td><code>/amcl_pose</code> 稳定性</td><td>静止时小幅波动，移动时轨迹连续无突跳。</td></tr>
+          <tr><td>TF 链</td><td><code>map -&gt; odom -&gt; base_footprint</code> 连贯。</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="panel">
+      <h2>3. 终端分工</h2>
+      <table>
+        <thead>
+          <tr><th>终端</th><th>用途</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>T1</td><td>底盘驱动</td></tr>
+          <tr><td>T2</td><td>雷达驱动</td></tr>
+          <tr><td>T3</td><td>地图 + RF2O + AMCL</td></tr>
+          <tr><td>T4</td><td>遥控微动与定位验收</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="panel">
+      <h2>4. 详细步骤</h2>
+
+      <div class="step">
+        <h3>Step 0：所有终端加载环境</h3>
+        <span class="term">T1/T2/T3/T4</span>
+        <pre><code>export WS=/home/nvidia/group12/RoboticNavigationXJTU26
+cd "$WS"
+source /opt/ros/noetic/setup.bash
+source devel/setup.bash
+export ROS_PACKAGE_PATH="$WS/src:${ROS_PACKAGE_PATH:-}"</code></pre>
+      </div>
+
+      <div class="step">
+        <h3>Step 1：启动底盘</h3>
+        <span class="term">T1</span>
+        <pre><code>roslaunch ebot_bringup bringup.launch</code></pre>
+      </div>
+
+      <div class="step">
+        <h3>Step 2：启动雷达</h3>
+        <span class="term">T2</span>
+        <pre><code>roslaunch ebot_bringup my_lidar.launch</code></pre>
+      </div>
+
+      <div class="step">
+        <h3>Step 3：启动定位链路</h3>
+        <span class="term">T3</span>
+        <pre><code>roslaunch ebot_bringup test_amcl.launch \
+  map:=nav.yaml \
+  amcl_profile:=baseline</code></pre>
+      </div>
+
+      <div class="step">
+        <h3>Step 4：初始化位姿并微动收敛</h3>
+        <span class="term">T4</span>
+        <ol>
+          <li>在 RViz 里把 Fixed Frame 设为 <code>map</code>。</li>
+          <li>使用 <code>2D Pose Estimate</code> 在机器人真实位置附近打初值。</li>
+          <li>小范围前后/转向移动 10~30 秒，让粒子收敛。</li>
+        </ol>
+        <pre><code>rosrun teleop_twist_keyboard teleop_twist_keyboard.py</code></pre>
+      </div>
+
+      <div class="step">
+        <h3>Step 5：话题与 TF 验收</h3>
+        <span class="term">T4（或新 tab）</span>
+        <pre><code>rostopic echo -n 10 /amcl_pose
+rostopic hz /amcl_pose
+rosrun tf tf_echo map base_footprint</code></pre>
+      </div>
+
+      <div class="step">
+        <h3>Step 6：结束流程</h3>
+        <span class="term">T4 -&gt; T3 -&gt; T2 -&gt; T1</span>
+        <p>先停止车体，再按顺序关闭节点。</p>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>5. AMCL Profile 对比（建议）</h2>
+      <p>在同一地图、同一区域做三次定位试验：</p>
+      <pre><code>roslaunch ebot_bringup test_amcl.launch map:=nav.yaml amcl_profile:=baseline
+roslaunch ebot_bringup test_amcl.launch map:=nav.yaml amcl_profile:=fast
+roslaunch ebot_bringup test_amcl.launch map:=nav.yaml amcl_profile:=robust</code></pre>
+      <table>
+        <thead>
+          <tr><th>Profile</th><th>倾向</th><th>观察重点</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>fast</td><td>收敛快</td><td>看是否容易局部漂移</td></tr>
+          <tr><td>baseline</td><td>均衡</td><td>作为默认基线</td></tr>
+          <tr><td>robust</td><td>抗噪稳健</td><td>看抖动是否降低、恢复是否更稳</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="panel">
+      <h2>6. 报告记录模板</h2>
+      <pre><code>实验编号：实验4（定位）
+地图文件：nav.yaml / nav.pgm
+amcl_profile：baseline / fast / robust
+
+1) 初始粒子云状态：
+2) 收敛耗时（估计）：
+3) 静止抖动情况：
+4) 移动跟踪连续性：
+5) 异常现象与处理：</code></pre>
+    </section>
+
+    <section class="panel">
+      <h2>7. 常见问题</h2>
+      <ul>
+        <li>粒子不收敛：先重新 <code>2D Pose Estimate</code>，再做小范围慢速移动。</li>
+        <li>位姿跳变：检查激光帧名、TF 连通性、地图是否和当前环境一致。</li>
+        <li><code>/amcl_pose</code> 没数据：确认 <code>test_amcl.launch</code> 日志中 map_server 与 amcl 都已启动。</li>
+      </ul>
+    </section>
+  </main>
+</body>
+</html>

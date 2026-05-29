@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>实验5 Cookbook - 路径规划与避障（实车）</title>
+  <style>
+    :root {
+      --bg: #f5efe9;
+      --card: #fffdf9;
+      --ink: #1f2d35;
+      --sub: #57656f;
+      --line: #d8cab8;
+      --accent: #8a4a28;
+      --accent-soft: #f6ece4;
+      --warn: #9e2f18;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      font-family: "PingFang SC", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+      background:
+        radial-gradient(circle at 100% 0%, rgba(138, 74, 40, 0.16), transparent 33%),
+        linear-gradient(180deg, #fffaf5 0%, var(--bg) 100%);
+    }
+    main { max-width: 1100px; margin: 0 auto; padding: 28px 16px 62px; }
+    h1, h2, h3 { margin: 0; line-height: 1.25; }
+    h1 { font-size: clamp(1.62rem, 3vw, 2.15rem); }
+    h2 { font-size: 1.3rem; color: var(--accent); margin-top: 24px; }
+    h3 { font-size: 1.06rem; color: var(--accent); margin-top: 13px; }
+    p, li { line-height: 1.72; }
+    .sub { color: var(--sub); margin-top: 8px; }
+    .panel {
+      margin-top: 14px;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 16px 18px;
+      box-shadow: 0 8px 22px rgba(33, 45, 66, 0.06);
+    }
+    .topnav { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 12px; }
+    .topnav a {
+      text-decoration: none;
+      color: #6f3d22;
+      border: 1px solid #d8bca7;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      padding: 6px 11px;
+      font-size: 0.9rem;
+    }
+    .step {
+      margin-top: 12px;
+      border: 1px dashed #cfb59f;
+      border-radius: 10px;
+      padding: 12px;
+      background: #fffdfa;
+    }
+    .term {
+      display: inline-block;
+      border-radius: 6px;
+      padding: 2px 7px;
+      background: #f6ece4;
+      color: #6f3d22;
+      font-weight: 600;
+      font-size: 0.88rem;
+      margin-bottom: 8px;
+    }
+    code {
+      font-family: "SFMono-Regular", Consolas, Menlo, monospace;
+      background: #f8efe7;
+      border-radius: 5px;
+      padding: 2px 6px;
+    }
+    pre {
+      margin: 8px 0 0;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px 12px;
+      background: #fffdfa;
+      overflow: auto;
+      line-height: 1.5;
+    }
+    .warn { color: var(--warn); font-weight: 700; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    th, td {
+      border: 1px solid var(--line);
+      padding: 9px 10px;
+      text-align: left;
+      vertical-align: top;
+    }
+    th { background: #f8ece3; }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="topnav">
+      <a href="./group12_navigation_functions.html">返回总索引</a>
+      <a href="./group12_exp04_localization.html">上一实验：实验4</a>
+    </div>
+
+    <h1>实验5 Cookbook：路径规划与避障（实车）</h1>
+    <p class="sub">
+      对应指导书：<code>docs/实验指导书-实验5_路径规划.pdf</code>。
+      目标是在实车上完成 <code>move_base</code> 导航任务，并进行规划器/参数对比实验。
+    </p>
+
+    <section class="panel">
+      <h2>1. 开始前必须满足</h2>
+      <ul>
+        <li>实验4已通过，AMCL 可稳定收敛。</li>
+        <li>地图文件可用：<code>src/ebot_bringup/maps/nav.yaml</code>。</li>
+        <li>现场可安全导航，已清除临时危险障碍。</li>
+      </ul>
+      <p class="warn">定位不稳时不要进入导航实验，先回到实验4调参。</p>
+    </section>
+
+    <section class="panel">
+      <h2>2. 终端分工</h2>
+      <table>
+        <thead>
+          <tr><th>终端</th><th>用途</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>T1</td><td>底盘驱动</td></tr>
+          <tr><td>T2</td><td>雷达驱动</td></tr>
+          <tr><td>T3</td><td>定位 + 导航总入口（test_nav）</td></tr>
+          <tr><td>T4</td><td>RViz 设点与人工监控</td></tr>
+          <tr><td>T5</td><td>导航状态监控与数据记录</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="panel">
+      <h2>3. 标准执行流程</h2>
+
+      <div class="step">
+        <h3>Step 0：加载环境（所有终端）</h3>
+        <span class="term">T1/T2/T3/T4/T5</span>
+        <pre><code>export WS=/home/nvidia/group12/RoboticNavigationXJTU26
+cd "$WS"
+source /opt/ros/noetic/setup.bash
+source devel/setup.bash
+export ROS_PACKAGE_PATH="$WS/src:${ROS_PACKAGE_PATH:-}"</code></pre>
+      </div>
+
+      <div class="step">
+        <h3>Step 1：底盘与雷达</h3>
+        <span class="term">T1</span>
+        <pre><code>roslaunch ebot_bringup bringup.launch</code></pre>
+        <span class="term">T2</span>
+        <pre><code>roslaunch ebot_bringup my_lidar.launch</code></pre>
+      </div>
+
+      <div class="step">
+        <h3>Step 2：启动导航总链路</h3>
+        <span class="term">T3</span>
+        <pre><code>roslaunch ebot_bringup test_nav.launch \
+  map:=nav.yaml \
+  amcl_profile:=baseline \
+  global_planner:=navfn/NavfnROS \
+  local_planner:=base_local_planner/TrajectoryPlannerROS</code></pre>
+      </div>
+
+      <div class="step">
+        <h3>Step 3：RViz 设置与定位初始化</h3>
+        <span class="term">T4</span>
+        <ol>
+          <li>Fixed Frame 设为 <code>map</code>。</li>
+          <li>显示项至少勾选：<code>Map</code>、<code>TF</code>、<code>LaserScan</code>、<code>Global Path</code>、<code>Local Path</code>。</li>
+          <li>先用 <code>2D Pose Estimate</code> 给初始位姿，再用 <code>2D Nav Goal</code> 发目标点。</li>
+        </ol>
+      </div>
+
+      <div class="step">
+        <h3>Step 4：在线状态检查</h3>
+        <span class="term">T5</span>
+        <pre><code>rostopic echo /move_base/status
+rostopic hz /cmd_vel
+rostopic echo -n 5 /move_base/TrajectoryPlannerROS/global_plan</code></pre>
+        <p>目标状态应从 <code>ACTIVE</code> 进入 <code>SUCCEEDED</code>；如反复恢复行为，说明参数或环境有问题。</p>
+      </div>
+
+      <div class="step">
+        <h3>Step 5：安全结束</h3>
+        <span class="term">先 T4 停止发目标，再按 T3/T2/T1 关闭</span>
+        <p>确保车体静止后再退出节点。</p>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>4. 规划器对比实验（必须做）</h2>
+      <p>保持同一张地图、同一组目标点，至少跑以下组合：</p>
+
+      <h3>4.1 全局规划器对比</h3>
+      <pre><code>roslaunch ebot_bringup test_nav.launch map:=nav.yaml \
+  global_planner:=navfn/NavfnROS \
+  local_planner:=base_local_planner/TrajectoryPlannerROS
+
+roslaunch ebot_bringup test_nav.launch map:=nav.yaml \
+  global_planner:=global_planner/GlobalPlanner \
+  local_planner:=base_local_planner/TrajectoryPlannerROS</code></pre>
+
+      <h3>4.2 局部规划器对比</h3>
+      <pre><code>roslaunch ebot_bringup test_nav.launch map:=nav.yaml \
+  global_planner:=navfn/NavfnROS \
+  local_planner:=base_local_planner/TrajectoryPlannerROS
+
+roslaunch ebot_bringup test_nav.launch map:=nav.yaml \
+  global_planner:=navfn/NavfnROS \
+  local_planner:=dwa_local_planner/DWAPlannerROS</code></pre>
+    </section>
+
+    <section class="panel">
+      <h2>5. costmap 档位对比实验（建议做）</h2>
+      <pre><code># 保守模式
+roslaunch ebot_bringup test_nav.launch map:=nav.yaml \
+  costmap_profile_file:=$(find ebot_bringup)/config/navigation/costmap_common_real_conservative.yaml
+
+# 激进模式
+roslaunch ebot_bringup test_nav.launch map:=nav.yaml \
+  costmap_profile_file:=$(find ebot_bringup)/config/navigation/costmap_common_real_aggressive.yaml</code></pre>
+      <table>
+        <thead>
+          <tr><th>模式</th><th>预期现象</th><th>关注指标</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>conservative</td><td>避障距离更大、路径更绕</td><td>安全性高，但效率可能下降</td></tr>
+          <tr><td>aggressive</td><td>路径更贴边、通过性更强</td><td>效率提升，但风险更高</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="panel">
+      <h2>6. 验收指标（建议量化）</h2>
+      <ol>
+        <li>成功率：5 次目标任务中成功到达次数。</li>
+        <li>平均到达时间：每次从发点到成功到达的时间。</li>
+        <li>恢复行为次数：是否频繁触发 recovery。</li>
+        <li>轨迹平滑度：急停、急转、抖动情况。</li>
+      </ol>
+    </section>
+
+    <section class="panel">
+      <h2>7. 实验记录模板</h2>
+      <pre><code>实验编号：实验5（路径规划与避障）
+地图：nav.yaml
+场景描述：
+
+组合A：navfn + TrajectoryPlannerROS
+- 成功率：
+- 平均到达时间：
+- 备注：
+
+组合B：GlobalPlanner + TrajectoryPlannerROS
+- 成功率：
+- 平均到达时间：
+- 备注：
+
+组合C：navfn + DWAPlannerROS
+- 成功率：
+- 平均到达时间：
+- 备注：</code></pre>
+    </section>
+
+    <section class="panel">
+      <h2>8. 常见问题</h2>
+      <ul>
+        <li>发了目标点但不动：先看 <code>/move_base/status</code> 是否 ACTIVE，再看 local costmap 是否被障碍层塞满。</li>
+        <li>路径明显不合理：检查 global/local planner 与 costmap 参数组合是否匹配。</li>
+        <li>频繁 recovery：减小局部速度上限、增大膨胀参数或改 conservative profile。</li>
+      </ul>
+    </section>
+  </main>
+</body>
+</html>

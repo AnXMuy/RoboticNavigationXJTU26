@@ -10,17 +10,22 @@
   - `lan_ssh_guide.sh`
   - `board_param_check.sh`
 
-## 2. 权威指南
+## 2. Cookbook 文档入口
 
-请直接阅读并按此执行：
+请按下面顺序阅读并执行：
 
-- `group12_navigation_functions.html`
+- 总索引：`group12_navigation_functions.html`
+- 实验2：`group12_exp02_teleop.html`
+- 实验3：`group12_exp03_mapping.html`
+- 实验4：`group12_exp04_localization.html`
+- 实验5：`group12_exp05_navigation.html`
 
-该文档是 cookbook 形式，包含：
-- 实验2~5逐步命令
-- 参数调优入口
-- 常见故障定位流程
-- 报告取证模板
+每个实验是独立 HTML，包含：
+- 明确的终端分工
+- 每一步命令与操作动作
+- 验收标准
+- 常见故障排查
+- 报告记录模板
 
 ## 3. PDF 与 demo 依据
 
@@ -41,4 +46,4 @@ roslaunch ebot_bringup bringup.launch
 roslaunch ebot_bringup my_lidar.launch
 ```
 
-后续建图/定位/导航命令请按 `group12_navigation_functions.html` 执行。
+后续建图/定位/导航命令请按对应实验 HTML 页面执行。

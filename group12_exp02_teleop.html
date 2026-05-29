@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>实验2 Cookbook - 键控机器人运动（实车）</title>
+  <style>
+    :root {
+      --bg: #edf4f2;
+      --card: #ffffff;
+      --ink: #1b2a33;
+      --sub: #53626e;
+      --line: #c9d6d1;
+      --accent: #166c5f;
+      --warn: #a34314;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      font-family: "PingFang SC", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+      background:
+        radial-gradient(circle at 90% 0%, rgba(22, 108, 95, 0.12), transparent 32%),
+        linear-gradient(180deg, #f7fcfa 0%, var(--bg) 100%);
+    }
+    main { max-width: 1050px; margin: 0 auto; padding: 28px 16px 60px; }
+    h1, h2, h3 { margin: 0; line-height: 1.25; }
+    h1 { font-size: clamp(1.6rem, 3vw, 2.1rem); }
+    h2 { font-size: 1.28rem; color: var(--accent); margin-top: 24px; }
+    h3 { font-size: 1.06rem; color: var(--accent); margin-top: 14px; }
+    p, li { line-height: 1.72; }
+    .sub { margin-top: 8px; color: var(--sub); }
+    .panel {
+      margin-top: 14px;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 16px 18px;
+      box-shadow: 0 8px 24px rgba(15, 28, 36, 0.06);
+    }
+    .topnav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .topnav a {
+      text-decoration: none;
+      color: #0f4e45;
+      border: 1px solid #b6cdc7;
+      border-radius: 999px;
+      padding: 6px 11px;
+      background: #edf6f4;
+      font-size: 0.9rem;
+    }
+    .step {
+      margin-top: 12px;
+      border: 1px dashed #b9cbc5;
+      border-radius: 10px;
+      padding: 12px;
+      background: #fafdfc;
+    }
+    .term {
+      display: inline-block;
+      border-radius: 6px;
+      padding: 2px 7px;
+      background: #e7f2ef;
+      color: #0d4f45;
+      font-weight: 600;
+      font-size: 0.88rem;
+      margin-bottom: 8px;
+    }
+    code {
+      font-family: "SFMono-Regular", Consolas, Menlo, monospace;
+      background: #edf4f2;
+      border-radius: 5px;
+      padding: 2px 6px;
+    }
+    pre {
+      margin: 8px 0 0;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px 12px;
+      background: #fcfffe;
+      overflow: auto;
+      line-height: 1.5;
+    }
+    .warn { color: var(--warn); font-weight: 700; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    th, td {
+      border: 1px solid var(--line);
+      padding: 9px 10px;
+      text-align: left;
+      vertical-align: top;
+    }
+    th { background: #ebf5f3; }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="topnav">
+      <a href="./group12_navigation_functions.html">返回总索引</a>
+      <a href="./group12_exp03_mapping.html">下一实验：实验3</a>
+    </div>
+
+    <h1>实验2 Cookbook：键控机器人运动（实车）</h1>
+    <p class="sub">
+      对应指导书：<code>docs/实验指导书-实验2_键控机器人运动.pdf</code>。
+      本页目标是让你稳定跑通“底盘驱动 + 键盘控制 + 里程计/TF 验收”全流程。
+    </p>
+
+    <section class="panel">
+      <h2>1. 实验目标与通过标准</h2>
+      <table>
+        <thead>
+          <tr><th>检查项</th><th>通过标准</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>键控前后左右与转向</td><td>按键后机器人动作方向正确，能平稳停车。</td></tr>
+          <tr><td><code>/cmd_vel</code></td><td>键控时持续发布，停键后能回零。</td></tr>
+          <tr><td><code>/odom</code></td><td>运动时位姿变化，静止时变化趋于稳定。</td></tr>
+          <tr><td><code>/tf</code></td><td>包含 <code>odom -&gt; base_footprint -&gt; base_link</code>。</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="panel">
+      <h2>2. 前置检查</h2>
+      <ul>
+        <li>车体抬空或周围 2m 内无障碍物，先做低速验证。</li>
+        <li>串口路径确认：<code>/dev/serial/by-path/...</code> 存在。</li>
+        <li>工作空间已编译通过（建议低并发）：<code>catkin_make -j1 -l1</code>。</li>
+      </ul>
+      <p class="warn">如果近期出现过 <code>cc1plus Killed</code>，本实验也统一用低并发。</p>
+    </section>
+
+    <section class="panel">
+      <h2>3. 终端分工</h2>
+      <table>
+        <thead>
+          <tr><th>终端</th><th>用途</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>T1</td><td>启动底盘节点（bringup）</td></tr>
+          <tr><td>T2</td><td>键盘遥控发布 <code>/cmd_vel</code></td></tr>
+          <tr><td>T3</td><td>监控话题与 TF（验收）</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="panel">
+      <h2>4. 详细步骤（逐条执行）</h2>
+
+      <div class="step">
+        <h3>Step 0：每个终端先加载环境</h3>
+        <span class="term">T1 / T2 / T3 都执行</span>
+        <pre><code>export WS=/home/nvidia/group12/RoboticNavigationXJTU26
+cd "$WS"
+source /opt/ros/noetic/setup.bash
+source devel/setup.bash
+export ROS_PACKAGE_PATH="$WS/src:${ROS_PACKAGE_PATH:-}"</code></pre>
+      </div>
+
+      <div class="step">
+        <h3>Step 1：启动底盘驱动</h3>
+        <span class="term">T1</span>
+        <pre><code>roslaunch ebot_bringup bringup.launch \
+  base_port:=/dev/serial/by-path/platform-3610000.usb-usb-0:2.4:1.0 \
+  base_baudrate:=115200</code></pre>
+        <p>如果你的串口路径不同，只改 <code>base_port</code>。</p>
+      </div>
+
+      <div class="step">
+        <h3>Step 2：启动键盘遥控</h3>
+        <span class="term">T2</span>
+        <pre><code>rosrun teleop_twist_keyboard teleop_twist_keyboard.py</code></pre>
+        <p>常用键：<code>i</code> 前进，<code>,</code> 后退，<code>j/l</code> 左/右转，<code>k</code> 急停。</p>
+      </div>
+
+      <div class="step">
+        <h3>Step 3：监控命令话题</h3>
+        <span class="term">T3</span>
+        <pre><code>rostopic hz /cmd_vel
+rostopic echo -n 5 /cmd_vel</code></pre>
+        <p>键控时应有非零速度，停键后逐步回到 0。</p>
+      </div>
+
+      <div class="step">
+        <h3>Step 4：监控里程计与 TF</h3>
+        <span class="term">T3</span>
+        <pre><code>rostopic echo -n 10 /odom
+rosrun tf tf_echo odom base_footprint</code></pre>
+        <p>前进/转向时，位置或朝向应持续变化；静止时保持稳定。</p>
+      </div>
+
+      <div class="step">
+        <h3>Step 5：安全结束</h3>
+        <span class="term">T2 然后 T1</span>
+        <p>先在 T2 按 <code>k</code> 停止，再分别 <code>Ctrl+C</code> 关闭节点。</p>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>5. 结果记录模板（建议直接照填）</h2>
+      <pre><code>实验编号：实验2（键控机器人运动）
+时间：YYYY-MM-DD HH:MM
+底盘串口：/dev/serial/by-path/...
+
+1) /cmd_vel 是否正常：是/否
+2) /odom 是否随动作变化：是/否
+3) TF odom->base_footprint 是否存在：是/否
+4) 异常现象：
+5) 排查动作与结论：</code></pre>
+    </section>
+
+    <section class="panel">
+      <h2>6. 常见问题（按症状处理）</h2>
+      <ul>
+        <li>底盘不动：先看 T1 是否串口打开成功，再查 <code>base_port</code> 与串口权限。</li>
+        <li><code>/cmd_vel</code> 有数据但车不动：检查底盘固件模式、急停状态、电池电压。</li>
+        <li><code>/odom</code> 不变化：查看底盘回传是否正常，确认底盘节点无报错重启。</li>
+      </ul>
+    </section>
+  </main>
+</body>
+</html>
