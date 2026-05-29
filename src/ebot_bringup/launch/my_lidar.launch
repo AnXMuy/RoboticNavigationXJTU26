@@ -2,11 +2,17 @@
 <launch>
   <arg name="config_file" default="$(find ebot_bringup)/config/lidar/ydlidar_real.yaml"/>
 
-  <node pkg="ydlidar_ros_driver"
+  <node name="ydlidar_lidar_publisher"
+        pkg="ydlidar_ros_driver"
         type="ydlidar_ros_driver_node"
-        name="ydlidar_lidar_publisher"
         output="screen"
         respawn="false">
     <rosparam command="load" file="$(arg config_file)"/>
   </node>
+
+  <!-- Real robot lidar mounting pose. -->
+  <node pkg="tf"
+        type="static_transform_publisher"
+        name="base_footprint_to_laser_frame"
+        args="0.0 0.0 0.20 0.0 0.0 0.0 /base_footprint /laser_frame 40" />
 </launch>

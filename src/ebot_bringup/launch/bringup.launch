@@ -1,28 +1,20 @@
 <?xml version="1.0"?>
 <launch>
-  <!-- Real robot serial configuration -->
   <arg name="base_port" default="/dev/serial/by-path/platform-3610000.usb-usb-0:2.4:1.0"/>
   <arg name="base_baudrate" default="115200"/>
-
-  <!-- Keep wheel odometry isolated from navigation TF to avoid conflicts -->
-  <arg name="wheel_odom_frame_id" default="wheel_odom"/>
-  <arg name="wheel_robot_frame_id" default="wheel_base_footprint"/>
-  <arg name="wheel_odom_topic" default="wheel_odom_raw"/>
-
   <arg name="smoother" default="false"/>
   <arg name="use_FDI_IMU_GNSS" default="false"/>
 
-  <!-- Publish static transforms required by the real robot -->
+  <arg name="wheel_odom_frame_id" default="odom"/>
+
   <include file="$(find ebot_bringup)/launch/static_tf.launch"/>
 
-  <!-- Start the wheeltec base driver -->
   <include file="$(find turn_on_wheeltec_robot)/launch/turn_on_wheeltec_robot.launch">
     <arg name="smoother" value="$(arg smoother)"/>
+    <arg name="use_FDI_IMU_GNSS" value="$(arg use_FDI_IMU_GNSS)"/>
     <arg name="odom_frame_id" value="$(arg wheel_odom_frame_id)"/>
-    <arg name="robot_frame_id" value="$(arg wheel_robot_frame_id)"/>
-    <arg name="odom_topic" value="$(arg wheel_odom_topic)"/>
+    <arg name="robot_frame_id" value="base_footprint"/>
     <arg name="usart_port_name" value="$(arg base_port)"/>
     <arg name="serial_baud_rate" value="$(arg base_baudrate)"/>
-    <arg name="use_FDI_IMU_GNSS" value="$(arg use_FDI_IMU_GNSS)"/>
   </include>
 </launch>

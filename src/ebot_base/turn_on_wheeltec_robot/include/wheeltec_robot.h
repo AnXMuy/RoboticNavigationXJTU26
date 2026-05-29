@@ -140,7 +140,6 @@ class turn_on_robot
 		ros::NodeHandle n;           //Create a ROS node handle //创建ROS节点句柄
 		ros::Time _Now, _Last_Time;  //Time dependent, used for integration to find displacement (mileage) //时间相关，用于积分求位移(里程)
 		float Sampling_Time;         //Sampling time, used for integration to find displacement (mileage) //采样时间，用于积分求位移(里程)
-		tf::TransformBroadcaster odom_broadcaster_; //Broadcast odom TF with configurable frames //使用可配置坐标系发布里程计TF
 
 		ros::Subscriber Cmd_Vel_Sub; //Initialize the topic subscriber //初始化话题订阅者
 		ros::Subscriber radar_sub;

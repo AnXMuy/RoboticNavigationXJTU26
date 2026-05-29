@@ -300,7 +300,8 @@ result_t DTSLidarDriver::createThread()
         printf("[YDLIDAR] Fail to create DTS thread\n");
         return RESULT_FAIL;
     }
-    printf("[YDLIDAR] Create DTS thread [0x%X]\n", _thread.getHandle());
+    printf("[YDLIDAR] Create DTS thread [0x%llX]\n",
+           static_cast<unsigned long long>(_thread.getHandle()));
     fflush(stdout);
     m_isScanning = true;
 

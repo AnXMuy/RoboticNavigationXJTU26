@@ -808,7 +808,8 @@ result_t SDMLidarDriver::createThread()
         return RESULT_FAIL;
     }
 
-    printf("[YDLIDAR] Create SDM thread 0x%X\n", _thread.getHandle());
+    printf("[YDLIDAR] Create SDM thread 0x%llX\n",
+           static_cast<unsigned long long>(_thread.getHandle()));
     fflush(stdout);
 
     return RESULT_OK;

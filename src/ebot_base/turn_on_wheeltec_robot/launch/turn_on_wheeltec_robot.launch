@@ -26,22 +26,16 @@
   <!-- <arg name="odom_frame_id"  default="odom_combined"/> -->
   <arg name="odom_frame_id"  default="odom"/>
   <arg name="robot_frame_id" default="base_footprint"/>
-  <arg name="odom_topic" default="odom"/>
   <arg name="usart_port_name" default="/dev/serial/by-path/platform-3610000.usb-usb-0:2.4:1.0"/>
   <arg name="serial_baud_rate" default="115200"/>
-  <arg name="smoother" default="false"/>
-  <arg name="use_FDI_IMU_GNSS" default="false"/>
 
   <group unless="$(eval (car_mode=='mini_mec_moveit_six' or car_mode=='mini_4wd_moveit_six') and if_voice==true)" >
   <!-- turn on base_serial 开启底层单片机的控制节点  -->
   <include file="$(find turn_on_wheeltec_robot)/launch/include/base_serial.launch" unless="$(arg repeat)">
-    <arg name="smoother" value="$(arg smoother)"/>
     <arg name="odom_frame_id"  value="$(arg odom_frame_id)"/>
     <arg name="robot_frame_id" value="$(arg robot_frame_id)"/>
-    <arg name="odom_topic" value="$(arg odom_topic)"/>
     <arg name="usart_port_name" value="$(arg usart_port_name)"/>
     <arg name="serial_baud_rate" value="$(arg serial_baud_rate)"/>
-    <arg name="use_FDI_IMU_GNSS" value="$(arg use_FDI_IMU_GNSS)"/>
   </include>
   </group>
 

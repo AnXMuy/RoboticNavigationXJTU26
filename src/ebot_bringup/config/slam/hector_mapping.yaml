@@ -1,12 +1,10 @@
-# Real-robot hector_mapping parameters for Experiment 3.
+# Baseline Hector mapping parameters for real robot.
 map_frame: map
 base_frame: base_footprint
-odom_frame: base_footprint
-
-use_tf_scan_transformation: true
-use_tf_pose_start_estimate: false
+odom_frame: odom
 pub_map_odom_transform: true
 
+scan_subscriber_queue_size: 5
 map_resolution: 0.05
 map_size: 2048
 map_start_x: 0.5
@@ -14,19 +12,15 @@ map_start_y: 0.5
 map_multi_res_levels: 2
 
 update_factor_free: 0.4
-update_factor_occupied: 0.7
-map_update_distance_thresh: 0.2
+update_factor_occupied: 0.9
+map_update_distance_thresh: 0.20
 map_update_angle_thresh: 0.06
+
 laser_z_min_value: -1.0
 laser_z_max_value: 1.0
+laser_min_dist: 0.10
+laser_max_dist: 16.0
 
-advertise_map_service: true
-scan_subscriber_queue_size: 5
-scan_topic: scan
-
-map_pub_period: 2.0
-laser_min_dist: 0.4
-laser_max_dist: 5.5
-output_timing: false
-pub_map_scanmatch_transform: true
+use_tf_scan_transformation: true
+use_tf_pose_start_estimate: false
 tf_map_scanmatch_transform_frame_name: scanmatcher_frame

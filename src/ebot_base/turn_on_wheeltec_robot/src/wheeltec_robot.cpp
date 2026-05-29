@@ -215,30 +215,30 @@ void turn_on_robot::Publish_Odom()
 {
     //Convert the Z-axis rotation Angle into a quaternion for expression 
     //把Z轴转角转换为四元数进行表达
-    const ros::Time stamp = ros::Time::now();
     geometry_msgs::Quaternion odom_quat = tf::createQuaternionMsgFromYaw(Robot_Pos.Z);
 	
     //first, we'll publish the transform over tf//12.11 slh move from bicycle_wheel_odometry.cpp
     geometry_msgs::TransformStamped odom_trans;
-    odom_trans.header.stamp = stamp;
-    odom_trans.header.frame_id = odom_frame_id;
-    odom_trans.child_frame_id = robot_frame_id;
+    odom_trans.header.stamp = ros::Time::now();
+    odom_trans.header.frame_id = "odom";
+    odom_trans.child_frame_id = "base_footprint";
     
-    odom_trans.transform.translation.x = Robot_Pos.X;
-    odom_trans.transform.translation.y = Robot_Pos.Y;
+    odom_trans.transform.translation.x = Robot_Vel.X;
+    odom_trans.transform.translation.y = Robot_Vel.Y;
     odom_trans.transform.translation.z = 0.0;
     odom_trans.transform.rotation = odom_quat;
  
     //send the transform
+    tf::TransformBroadcaster odom_broadcaster_;
     odom_broadcaster_.sendTransform(odom_trans);
 
     ////next, we'll publish the odometry message over ROS
     nav_msgs::Odometry odom; //Instance the odometer topic data //实例化里程计话题数据
-    odom.header.stamp = stamp; 
+    odom.header.stamp = ros::Time::now(); 
     odom.header.frame_id = odom_frame_id; // Odometer TF parent coordinates //里程计TF父坐标
     odom.pose.pose.position.x = Robot_Pos.X; //Position //位置
     odom.pose.pose.position.y = Robot_Pos.Y;
-    odom.pose.pose.position.z = 0.0;
+    odom.pose.pose.position.z = Robot_Pos.Z;
     odom.pose.pose.orientation = odom_quat; //Posture, Quaternion converted by Z-axis rotation //姿态，通过Z轴转角转换的四元数
     
     
@@ -677,7 +677,8 @@ turn_on_robot::turn_on_robot():Sampling_Time(0),Power_voltage(0)
 
   chassis_publisher = n.advertise<geometry_msgs::TwistStamped>("Chassis", 50); //Create a chassis_status topic publisher //创建底盘速度话题发布者
   voltage_publisher = n.advertise<std_msgs::Float32>("PowerVoltage", 10); //Create a battery-voltage topic publisher //创建电池电压话题发布者
-  odom_publisher    = n.advertise<nav_msgs::Odometry>("odom", 50); //Create the odometer topic publisher //创建里程计话题发布者
+  //odom_publisher    = n.advertise<nav_msgs::Odometry>("odom", 50); //Create the odometer topic publisher //创建里程计话题发布者
+  //odom_publisher    = n.advertise<nav_msgs::Odometry>("/bicycle_wheel_odometry/odom", 50); //Create the odometer topic publisher //创建里程计话题发布者//12.11 slh the same name as bicycle_wheel_odometry.cpp
   imu_publisher     = n.advertise<sensor_msgs::Imu>("imu", 20); //Create an IMU topic publisher //创建IMU话题发布者
 
   //Set the velocity control command callback function

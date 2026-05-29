@@ -2,14 +2,12 @@
 <launch>
   <arg name="resolution_profile" default="baseline" doc="baseline|fine|coarse"/>
 
-  <arg name="real_baseline" default="$(find ebot_bringup)/config/slam/hector_mapping.yaml"/>
-  <arg name="real_fine" default="$(find ebot_bringup)/config/slam/hector_mapping_res_fine.yaml"/>
-  <arg name="real_coarse" default="$(find ebot_bringup)/config/slam/hector_mapping_res_coarse.yaml"/>
+  <arg name="profile_baseline" default="$(find ebot_bringup)/config/slam/hector_mapping.yaml"/>
+  <arg name="profile_fine" default="$(find ebot_bringup)/config/slam/hector_mapping_res_fine.yaml"/>
+  <arg name="profile_coarse" default="$(find ebot_bringup)/config/slam/hector_mapping_res_coarse.yaml"/>
 
   <arg name="profile_file"
-       default="$(eval real_fine if resolution_profile == 'fine' else real_coarse if resolution_profile == 'coarse' else real_baseline)"/>
-
-  <!-- allow explicit file override -->
+       default="$(eval profile_fine if resolution_profile == 'fine' else profile_coarse if resolution_profile == 'coarse' else profile_baseline)"/>
   <arg name="config_file" default="$(arg profile_file)"/>
 
   <node pkg="hector_mapping"

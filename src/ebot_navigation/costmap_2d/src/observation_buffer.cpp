@@ -88,7 +88,7 @@ bool ObservationBuffer::setGlobalFrame(const std::string new_global_frame)
       tf2_buffer_.transform(origin, origin, new_global_frame);
       obs.origin_ = origin.point;
 
-      // Transform PointCloud2 explicitly to avoid tf2::toMsg overload resolution issues
+      // Transform PointCloud2 explicitly to avoid tf2::toMsg overload resolution issues.
       const geometry_msgs::TransformStamped cloud_transform = tf2_buffer_.lookupTransform(
           new_global_frame, obs.cloud_->header.frame_id, obs.cloud_->header.stamp, ros::Duration(tf_tolerance_));
       sensor_msgs::PointCloud2 transformed_cloud;
@@ -136,7 +136,7 @@ void ObservationBuffer::bufferCloud(const sensor_msgs::PointCloud2& cloud)
 
     sensor_msgs::PointCloud2 global_frame_cloud;
 
-    // Transform PointCloud2 explicitly to avoid tf2::toMsg overload resolution issues
+    // Transform PointCloud2 explicitly to avoid tf2::toMsg overload resolution issues.
     const geometry_msgs::TransformStamped cloud_transform = tf2_buffer_.lookupTransform(
         global_frame_, cloud.header.frame_id, cloud.header.stamp, ros::Duration(tf_tolerance_));
     tf2::doTransform(cloud, global_frame_cloud, cloud_transform);

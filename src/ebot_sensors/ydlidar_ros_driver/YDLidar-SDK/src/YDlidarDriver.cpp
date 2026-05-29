@@ -25,6 +25,7 @@
 #include <core/network/ActiveSocket.h>
 #include "YDlidarDriver.h"
 #include <core/serial/common.h>
+#include <functional>
 #include <math.h>
 #include <ydlidar_config.h>
 
@@ -2014,7 +2015,9 @@ namespace ydlidar
       return RESULT_FAIL;
     }
 
-    printf("[YDLIDAR] Create thread 0x%X\n", m_thread->get_id());
+    const unsigned long long thread_id_hash = static_cast<unsigned long long>(
+      std::hash<std::thread::id>{}(m_thread->get_id()));
+    printf("[YDLIDAR] Create thread 0x%llX\n", thread_id_hash);
     fflush(stdout);
     return RESULT_OK;
   }

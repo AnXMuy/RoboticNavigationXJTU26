@@ -2,14 +2,12 @@
 <launch>
   <arg name="amcl_profile" default="baseline" doc="baseline|fast|robust"/>
 
-  <arg name="real_baseline" default="$(find ebot_bringup)/config/localization/amcl_real.yaml"/>
-  <arg name="real_fast" default="$(find ebot_bringup)/config/localization/amcl_real_fast.yaml"/>
-  <arg name="real_robust" default="$(find ebot_bringup)/config/localization/amcl_real_robust.yaml"/>
+  <arg name="profile_baseline" default="$(find ebot_bringup)/config/localization/amcl_real.yaml"/>
+  <arg name="profile_fast" default="$(find ebot_bringup)/config/localization/amcl_real_fast.yaml"/>
+  <arg name="profile_robust" default="$(find ebot_bringup)/config/localization/amcl_real_robust.yaml"/>
 
   <arg name="profile_file"
-       default="$(eval real_fast if amcl_profile == 'fast' else real_robust if amcl_profile == 'robust' else real_baseline)"/>
-
-  <!-- allow explicit file override -->
+       default="$(eval profile_fast if amcl_profile == 'fast' else profile_robust if amcl_profile == 'robust' else profile_baseline)"/>
   <arg name="config_file" default="$(arg profile_file)"/>
 
   <node pkg="amcl"

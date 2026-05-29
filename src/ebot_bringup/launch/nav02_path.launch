@@ -1,11 +1,7 @@
 <?xml version="1.0"?>
 <launch>
-  <!-- Planner plugin selection for advanced experiments -->
   <arg name="global_planner" default="navfn/NavfnROS"/>
   <arg name="local_planner" default="base_local_planner/TrajectoryPlannerROS"/>
-
-  <!-- Costmap profile override:
-       pass an explicit file for conservative/aggressive profile comparison -->
   <arg name="costmap_profile_file" default=""/>
 
   <arg name="costmap_common_real" default="$(find ebot_bringup)/config/navigation/costmap_common_real.yaml"/>

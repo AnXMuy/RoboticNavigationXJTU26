@@ -6,13 +6,11 @@
   <arg name="local_planner" default="base_local_planner/TrajectoryPlannerROS"/>
   <arg name="costmap_profile_file" default=""/>
 
-  <!-- Load map + localization chain -->
   <include file="$(find ebot_bringup)/launch/test_amcl.launch">
     <arg name="map" value="$(arg map)"/>
     <arg name="amcl_profile" value="$(arg amcl_profile)"/>
   </include>
 
-  <!-- Start move_base path planning + local control -->
   <include file="$(find ebot_bringup)/launch/nav02_path.launch">
     <arg name="global_planner" value="$(arg global_planner)"/>
     <arg name="local_planner" value="$(arg local_planner)"/>

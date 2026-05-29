@@ -33,6 +33,7 @@
 *********************************************************************/
 #include <math.h>
 #include <fstream>
+#include <functional>
 #include "GSLidarDriver.h"
 #include "core/serial/common.h"
 #include <core/serial/serial.h>
@@ -1473,7 +1474,9 @@ result_t GSLidarDriver::createThread()
         return RESULT_FAIL;
     }
 
-    printf("[GSLidar] Create GS thread 0x%X\n", m_thread->get_id());
+    const unsigned long long thread_id_hash = static_cast<unsigned long long>(
+      std::hash<std::thread::id>{}(m_thread->get_id()));
+    printf("[GSLidar] Create GS thread 0x%llX\n", thread_id_hash);
     fflush(stdout);
     return RESULT_OK;
 }
