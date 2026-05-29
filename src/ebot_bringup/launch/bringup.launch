@@ -2,16 +2,12 @@
 <launch>
   <arg name="base_port" default="/dev/serial/by-path/platform-3610000.usb-usb-0:2.4:1.0"/>
   <arg name="base_baudrate" default="115200"/>
-  <arg name="smoother" default="false"/>
-  <arg name="use_FDI_IMU_GNSS" default="false"/>
 
   <arg name="wheel_odom_frame_id" default="odom"/>
 
   <include file="$(find ebot_bringup)/launch/static_tf.launch"/>
 
   <include file="$(find turn_on_wheeltec_robot)/launch/turn_on_wheeltec_robot.launch">
-    <arg name="smoother" value="$(arg smoother)"/>
-    <arg name="use_FDI_IMU_GNSS" value="$(arg use_FDI_IMU_GNSS)"/>
     <arg name="odom_frame_id" value="$(arg wheel_odom_frame_id)"/>
     <arg name="robot_frame_id" value="base_footprint"/>
     <arg name="usart_port_name" value="$(arg base_port)"/>
