@@ -1,0 +1,4 @@
+<launch>
+  <node pkg="plumbing_pub_sub" type="talker.py" name="talker_py" output="screen" />
+  <node pkg="plumbing_pub_sub" type="listener.py" name="listener_py" output="screen" />
+</launch>
