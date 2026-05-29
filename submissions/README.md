@@ -15,6 +15,7 @@
 - 历史提交包从 `MistyAir:/Users/misty/Documents/Courses/2025-spring/机器人导航` 拉取。
 - 实验 3/4 与实验 5 的新增整理材料来自本地工作区，包含截图归档、关键 launch/yaml/map 文件和说明文档。
 - 实验 5 报告主文件为 `lab5/实验5_路径规划实验报告.tex`，风格与实验 2 的 LaTeX 报告保持一致；同时保留 PDF、Word 和 Markdown 备份。
+- 实验 5 的正式提交包为 `lab5/人工智能2302_蒋梓轩_汪翌秦_孙靖淞_实验5_路径规划_正式提交.zip`，按指导书要求使用密码 `robotics12` 加密，包内包含 PDF 报告和 `catkin_ebot/src/ebot_bringup` 代码结构。
 
 ## 实验 5 补充说明
 

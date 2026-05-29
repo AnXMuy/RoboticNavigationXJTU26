@@ -12,6 +12,7 @@
 - `source/param/`：代价地图、局部规划器、AMCL、RF2O 和 move_base 参数文件。
 - `source/maps/`：路径规划使用的静态地图文件。
 - `source/reference_src/`：从导航栈源码中提取的参考文件，包括 `move_base.cpp`、全局规划、代价地图层和局部规划相关源码。
+- `人工智能2302_蒋梓轩_汪翌秦_孙靖淞_实验5_路径规划_正式提交.zip`：按实验指导书“实验报告和代码打包、加密压缩”要求整理的正式提交包，密码为 `robotics12`。其中报告只放 PDF，代码按 `code/catkin_ebot/src/ebot_bringup` 结构放置导航相关 launch、param 和 map 文件。
 
 ## 截图对应关系
 
