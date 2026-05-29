@@ -1,6 +1,9 @@
 <?xml version="1.0"?>
 <launch>
   <arg name="config_file" default="$(find ebot_bringup)/config/lidar/ydlidar_real.yaml"/>
+  <arg name="lidar_port" default="/dev/ydlidar"/>
+  <arg name="lidar_baudrate" default="230400"/>
+  <arg name="laser_frame" default="laser_frame"/>
 
   <node name="ydlidar_lidar_publisher"
         pkg="ydlidar_ros_driver"
@@ -8,11 +11,14 @@
         output="screen"
         respawn="false">
     <rosparam command="load" file="$(arg config_file)"/>
+    <param name="port" value="$(arg lidar_port)"/>
+    <param name="baudrate" value="$(arg lidar_baudrate)"/>
+    <param name="frame_id" value="$(arg laser_frame)"/>
   </node>
 
   <!-- Real robot lidar mounting pose. -->
   <node pkg="tf"
         type="static_transform_publisher"
         name="base_footprint_to_laser_frame"
-        args="0.0 0.0 0.20 0.0 0.0 0.0 /base_footprint /laser_frame 40" />
+        args="0.0 0.0 0.20 0.0 0.0 0.0 base_footprint $(arg laser_frame) 40" />
 </launch>
