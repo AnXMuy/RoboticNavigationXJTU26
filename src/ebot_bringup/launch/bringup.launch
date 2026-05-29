@@ -1,16 +1,22 @@
 <?xml version="1.0"?>
 <launch>
-  <arg name="base_port" default="/dev/serial/by-path/platform-3610000.usb-usb-0:2.4:1.0"/>
-  <arg name="base_baudrate" default="115200"/>
-
+  <arg name="simulation" default="false"/>
+  <arg name="use_sim_time" default="true"/>
+  <arg name="gui" default="true"/>
   <arg name="wheel_odom_frame_id" default="odom"/>
 
-  <include file="$(find ebot_bringup)/launch/static_tf.launch"/>
-
-  <include file="$(find turn_on_wheeltec_robot)/launch/turn_on_wheeltec_robot.launch">
+  <group unless="$(arg simulation)">
+    <include file="$(find ebot_bringup)/launch/static_tf.launch"/>
+    <include file="$(find turn_on_wheeltec_robot)/launch/turn_on_wheeltec_robot.launch">
     <arg name="odom_frame_id" value="$(arg wheel_odom_frame_id)"/>
-    <arg name="robot_frame_id" value="base_footprint"/>
-    <arg name="usart_port_name" value="$(arg base_port)"/>
-    <arg name="serial_baud_rate" value="$(arg base_baudrate)"/>
-  </include>
+    </include>
+    <include file="$(find ebot_bringup)/launch/my_lidar.launch"/>
+  </group>
+
+  <group if="$(arg simulation)">
+    <include file="$(find ebot_bringup)/launch/bringup_sim.launch">
+      <arg name="use_sim_time" value="$(arg use_sim_time)"/>
+      <arg name="gui" value="$(arg gui)"/>
+    </include>
+  </group>
 </launch>

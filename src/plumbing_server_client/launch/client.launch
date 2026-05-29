@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<launch>
+  <arg name="num1" default="10"/>
+  <arg name="num2" default="20"/>
+  <node pkg="plumbing_server_client" type="demo02_client_node"
+        name="client_node" output="screen" args="$(arg num1) $(arg num2)" />
+</launch>

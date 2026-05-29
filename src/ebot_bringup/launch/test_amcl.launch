@@ -1,7 +1,6 @@
 <?xml version="1.0"?>
 <launch>
   <arg name="map" default="nav.yaml"/>
-  <arg name="amcl_profile" default="baseline"/>
 
   <node name="map_server"
         pkg="map_server"
@@ -9,8 +8,5 @@
         args="$(find ebot_bringup)/maps/$(arg map)"/>
 
   <include file="$(find ebot_bringup)/launch/nav01_rf2o.launch"/>
-
-  <include file="$(find ebot_bringup)/launch/nav01_amcl.launch">
-    <arg name="amcl_profile" value="$(arg amcl_profile)"/>
-  </include>
+  <include file="$(find ebot_bringup)/launch/nav01_amcl.launch"/>
 </launch>

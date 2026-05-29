@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>vehicle_sim</name>
+  <version>0.0.1</version>
+  <description>Experiment 2 RViz vehicle model and keyboard odometry simulation.</description>
+
+  <maintainer email="group12@example.com">Group12</maintainer>
+  <license>Apache-2.0</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <depend>geometry_msgs</depend>
+  <depend>nav_msgs</depend>
+  <depend>robot_state_publisher</depend>
+  <depend>rospy</depend>
+  <depend>tf</depend>
+  <depend>tf2_ros</depend>
+  <depend>urdf</depend>
+  <depend>xacro</depend>
+</package>

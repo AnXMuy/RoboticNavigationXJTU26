@@ -1,0 +1,6 @@
+<?xml version="1.0" ?>
+<!-- 小车底盘添加摄像头 -->
+<robot name="vehicle_camera" xmlns:xacro="http://wiki.ros.org/xacro">
+
+
+</robot>

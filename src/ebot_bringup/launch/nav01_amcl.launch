@@ -1,19 +1,12 @@
 <?xml version="1.0"?>
 <launch>
-  <arg name="amcl_profile" default="baseline" doc="baseline|fast|robust"/>
-
-  <arg name="profile_baseline" default="$(find ebot_bringup)/config/localization/amcl_real.yaml"/>
-  <arg name="profile_fast" default="$(find ebot_bringup)/config/localization/amcl_real_fast.yaml"/>
-  <arg name="profile_robust" default="$(find ebot_bringup)/config/localization/amcl_real_robust.yaml"/>
-
-  <arg name="profile_file"
-       default="$(eval profile_fast if amcl_profile == 'fast' else profile_robust if amcl_profile == 'robust' else profile_baseline)"/>
-  <arg name="config_file" default="$(arg profile_file)"/>
-
   <node pkg="amcl"
         type="amcl"
         name="amcl"
         output="screen">
-    <rosparam command="load" file="$(arg config_file)"/>
+    <rosparam command="load" file="$(find ebot_bringup)/param/amcl_params.yaml"/>
+    <param name="odom_frame_id" value="odom"/>
+    <param name="base_frame_id" value="base_footprint"/>
+    <param name="global_frame_id" value="map"/>
   </node>
 </launch>

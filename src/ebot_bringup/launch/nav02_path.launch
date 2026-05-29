@@ -1,56 +1,22 @@
 <?xml version="1.0"?>
 <launch>
-  <arg name="global_planner" default="navfn/NavfnROS"/>
-  <arg name="local_planner" default="base_local_planner/TrajectoryPlannerROS"/>
-  <arg name="costmap_profile_file" default=""/>
-
-  <arg name="costmap_common_real" default="$(find ebot_bringup)/config/navigation/costmap_common_real.yaml"/>
-  <arg name="costmap_common_file" default="$(eval costmap_common_real if costmap_profile_file == '' else costmap_profile_file)"/>
-
-  <arg name="global_costmap_file" default="$(find ebot_bringup)/config/navigation/global_costmap_params.yaml"/>
-  <arg name="local_costmap_file" default="$(find ebot_bringup)/config/navigation/local_costmap_params.yaml"/>
-
-  <arg name="traj_planner_common_file" default="$(find ebot_bringup)/config/navigation/base_local_planner_params.yaml"/>
-  <arg name="traj_planner_real_file" default="$(find ebot_bringup)/config/navigation/base_local_planner_real.yaml"/>
-
-  <arg name="dwa_planner_common_file" default="$(find ebot_bringup)/config/navigation/dwa_local_planner_params.yaml"/>
-  <arg name="dwa_planner_real_file" default="$(find ebot_bringup)/config/navigation/dwa_local_planner_real.yaml"/>
-
-  <arg name="global_planner_params_file" default="$(find ebot_bringup)/config/navigation/global_planner_params.yaml"/>
-  <arg name="move_base_file" default="$(find ebot_bringup)/config/navigation/move_base_params.yaml"/>
-
   <node pkg="move_base"
         type="move_base"
         name="move_base"
         output="screen"
         clear_params="true"
         respawn="false">
-    <param name="base_global_planner" value="$(arg global_planner)"/>
-    <param name="base_local_planner" value="$(arg local_planner)"/>
-
-    <rosparam command="load" file="$(arg costmap_common_file)" ns="global_costmap"/>
-    <rosparam command="load" file="$(arg costmap_common_file)" ns="local_costmap"/>
-    <rosparam command="load" file="$(arg global_costmap_file)"/>
-    <rosparam command="load" file="$(arg local_costmap_file)"/>
-
-    <rosparam if="$(eval global_planner == 'global_planner/GlobalPlanner')"
-              command="load"
-              file="$(arg global_planner_params_file)"/>
-
-    <rosparam if="$(eval local_planner == 'base_local_planner/TrajectoryPlannerROS')"
-              command="load"
-              file="$(arg traj_planner_common_file)"/>
-    <rosparam if="$(eval local_planner == 'base_local_planner/TrajectoryPlannerROS')"
-              command="load"
-              file="$(arg traj_planner_real_file)"/>
-
-    <rosparam if="$(eval local_planner == 'dwa_local_planner/DWAPlannerROS')"
-              command="load"
-              file="$(arg dwa_planner_common_file)"/>
-    <rosparam if="$(eval local_planner == 'dwa_local_planner/DWAPlannerROS')"
-              command="load"
-              file="$(arg dwa_planner_real_file)"/>
-
-    <rosparam command="load" file="$(arg move_base_file)"/>
+    <rosparam file="$(find ebot_bringup)/param/costmap_common_params.yaml"
+              command="load" ns="global_costmap"/>
+    <rosparam file="$(find ebot_bringup)/param/costmap_common_params.yaml"
+              command="load" ns="local_costmap"/>
+    <rosparam file="$(find ebot_bringup)/param/local_costmap_params.yaml"
+              command="load"/>
+    <rosparam file="$(find ebot_bringup)/param/global_costmap_params.yaml"
+              command="load"/>
+    <rosparam file="$(find ebot_bringup)/param/base_local_planner_params.yaml"
+              command="load"/>
+    <rosparam file="$(find ebot_bringup)/param/move_base_params.yaml"
+              command="load"/>
   </node>
 </launch>
