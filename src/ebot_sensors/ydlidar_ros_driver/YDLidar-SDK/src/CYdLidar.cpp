@@ -36,6 +36,12 @@
 #include "ETLidarDriver.h"
 #include "GSLidarDriver.h"
 #include "SDMLidarDriver.h"
+#ifdef SDK_CMD_STARTSCAN
+#undef SDK_CMD_STARTSCAN
+#endif
+#ifdef SDK_CMD_STOPSCAN
+#undef SDK_CMD_STOPSCAN
+#endif
 #include "DTSLidarDriver.h"
 
 using namespace std;

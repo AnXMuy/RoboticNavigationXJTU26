@@ -44,6 +44,7 @@
 #include <sstream>
 #include <iomanip>
 #include <stdarg.h>
+#include <cstdio>
 
 /**
  * @brief ydlidar
@@ -1070,13 +1071,12 @@ inline void printHex(const uint8_t *data, int size)
   char buff[1024] = {0}; \
   va_list ap; \
   va_start(ap, fmt); \
-  vsprintf(buff, fmt, ap); \
+  vsnprintf(buff, sizeof(buff), fmt, ap); \
   va_end(ap); \
-  printf(buff); \
-  printf("\n");
+  printf("%s\n", buff);
 
 //调试
-inline void debug(char* fmt, ...)
+inline void debug(const char* fmt, ...)
 {
 #ifdef _WIN32
 #else
@@ -1088,7 +1088,7 @@ inline void debug(char* fmt, ...)
 }
 
 //常规
-inline void info(char* fmt, ...)
+inline void info(const char* fmt, ...)
 {
 #ifdef _WIN32
 #else
@@ -1100,7 +1100,7 @@ inline void info(char* fmt, ...)
 }
 
 //警告
-inline void warn(char* fmt, ...)
+inline void warn(const char* fmt, ...)
 {
 #ifdef _WIN32
 #else
@@ -1112,7 +1112,7 @@ inline void warn(char* fmt, ...)
 }
 
 //错误
-inline void error(char* fmt, ...)
+inline void error(const char* fmt, ...)
 {
 #ifdef _WIN32
 #else
