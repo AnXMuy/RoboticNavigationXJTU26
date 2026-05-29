@@ -1,15 +1,12 @@
 <?xml version="1.0"?>
 <launch>
-  <arg name="mode" default="real"/>
   <arg name="config_file" default="$(find ebot_bringup)/config/lidar/ydlidar_real.yaml"/>
 
-  <group if="$(eval mode == 'real')">
-    <node pkg="ydlidar_ros_driver"
-          type="ydlidar_ros_driver_node"
-          name="ydlidar_lidar_publisher"
-          output="screen"
-          respawn="false">
-      <rosparam command="load" file="$(arg config_file)"/>
-    </node>
-  </group>
+  <node pkg="ydlidar_ros_driver"
+        type="ydlidar_ros_driver_node"
+        name="ydlidar_lidar_publisher"
+        output="screen"
+        respawn="false">
+    <rosparam command="load" file="$(arg config_file)"/>
+  </node>
 </launch>

@@ -1,7 +1,5 @@
 <?xml version="1.0"?>
 <launch>
-  <arg name="mode" default="real"/>
-
   <!-- Planner plugin selection for advanced experiments -->
   <arg name="global_planner" default="navfn/NavfnROS"/>
   <arg name="local_planner" default="base_local_planner/TrajectoryPlannerROS"/>
@@ -11,22 +9,16 @@
   <arg name="costmap_profile_file" default=""/>
 
   <arg name="costmap_common_real" default="$(find ebot_bringup)/config/navigation/costmap_common_real.yaml"/>
-  <arg name="costmap_common_sim" default="$(find ebot_bringup)/config/navigation/costmap_common_sim.yaml"/>
-  <arg name="costmap_common_default_file" default="$(eval costmap_common_sim if mode == 'sim' else costmap_common_real)"/>
-  <arg name="costmap_common_file" default="$(eval costmap_common_default_file if costmap_profile_file == '' else costmap_profile_file)"/>
+  <arg name="costmap_common_file" default="$(eval costmap_common_real if costmap_profile_file == '' else costmap_profile_file)"/>
 
   <arg name="global_costmap_file" default="$(find ebot_bringup)/config/navigation/global_costmap_params.yaml"/>
   <arg name="local_costmap_file" default="$(find ebot_bringup)/config/navigation/local_costmap_params.yaml"/>
 
   <arg name="traj_planner_common_file" default="$(find ebot_bringup)/config/navigation/base_local_planner_params.yaml"/>
   <arg name="traj_planner_real_file" default="$(find ebot_bringup)/config/navigation/base_local_planner_real.yaml"/>
-  <arg name="traj_planner_sim_file" default="$(find ebot_bringup)/config/navigation/base_local_planner_sim.yaml"/>
-  <arg name="traj_planner_mode_file" default="$(eval traj_planner_sim_file if mode == 'sim' else traj_planner_real_file)"/>
 
   <arg name="dwa_planner_common_file" default="$(find ebot_bringup)/config/navigation/dwa_local_planner_params.yaml"/>
   <arg name="dwa_planner_real_file" default="$(find ebot_bringup)/config/navigation/dwa_local_planner_real.yaml"/>
-  <arg name="dwa_planner_sim_file" default="$(find ebot_bringup)/config/navigation/dwa_local_planner_sim.yaml"/>
-  <arg name="dwa_planner_mode_file" default="$(eval dwa_planner_sim_file if mode == 'sim' else dwa_planner_real_file)"/>
 
   <arg name="global_planner_params_file" default="$(find ebot_bringup)/config/navigation/global_planner_params.yaml"/>
   <arg name="move_base_file" default="$(find ebot_bringup)/config/navigation/move_base_params.yaml"/>
@@ -54,14 +46,14 @@
               file="$(arg traj_planner_common_file)"/>
     <rosparam if="$(eval local_planner == 'base_local_planner/TrajectoryPlannerROS')"
               command="load"
-              file="$(arg traj_planner_mode_file)"/>
+              file="$(arg traj_planner_real_file)"/>
 
     <rosparam if="$(eval local_planner == 'dwa_local_planner/DWAPlannerROS')"
               command="load"
               file="$(arg dwa_planner_common_file)"/>
     <rosparam if="$(eval local_planner == 'dwa_local_planner/DWAPlannerROS')"
               command="load"
-              file="$(arg dwa_planner_mode_file)"/>
+              file="$(arg dwa_planner_real_file)"/>
 
     <rosparam command="load" file="$(arg move_base_file)"/>
   </node>

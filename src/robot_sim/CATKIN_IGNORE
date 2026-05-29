@@ -1,0 +1,1 @@
+Real-robot-only refactor: simulation package is intentionally excluded from catkin builds.

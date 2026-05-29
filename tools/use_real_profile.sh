@@ -7,8 +7,12 @@ REAL_ONLY_PKGS=(
   "src/ebot_sensors/ydlidar_ros_driver"
   "src/ebot_navigation/rf2o_laser_odometry"
 )
+SIM_PKGS=(
+  "src/robot_sim"
+  "src/vehicle_sim"
+)
 
-echo "[profile] Switching to full real-robot build profile"
+echo "[profile] Enforcing real-robot-only build profile"
 for rel in "${REAL_ONLY_PKGS[@]}"; do
   pkg_dir="$ROOT_DIR/$rel"
   if [[ -f "$pkg_dir/CATKIN_IGNORE" ]]; then
@@ -19,4 +23,12 @@ for rel in "${REAL_ONLY_PKGS[@]}"; do
   fi
 done
 
-echo "[profile] Done. catkin_make will include real robot driver packages."
+for rel in "${SIM_PKGS[@]}"; do
+  pkg_dir="$ROOT_DIR/$rel"
+  if [[ -d "$pkg_dir" ]]; then
+    touch "$pkg_dir/CATKIN_IGNORE"
+    echo "  - ignore $rel (simulation disabled)"
+  fi
+done
+
+echo "[profile] Done. catkin_make will compile only real-robot workflow packages."
