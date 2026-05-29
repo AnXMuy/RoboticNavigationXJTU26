@@ -41,6 +41,7 @@
 #include <sensor_msgs/point_cloud2_iterator.h>
 
 using namespace std;
+using namespace tf2;
 
 namespace costmap_2d
 {
@@ -88,14 +89,10 @@ bool ObservationBuffer::setGlobalFrame(const std::string new_global_frame)
       tf2_buffer_.transform(origin, origin, new_global_frame);
       obs.origin_ = origin.point;
 
-      // Transform PointCloud2 explicitly to avoid tf2::toMsg overload resolution issues.
-      const geometry_msgs::TransformStamped cloud_transform = tf2_buffer_.lookupTransform(
-          new_global_frame, obs.cloud_->header.frame_id, obs.cloud_->header.stamp, ros::Duration(tf_tolerance_));
-      sensor_msgs::PointCloud2 transformed_cloud;
-      tf2::doTransform(*(obs.cloud_), transformed_cloud, cloud_transform);
-      *(obs.cloud_) = transformed_cloud;
+      // we also need to transform the cloud of the observation to the new global frame
+      tf2_buffer_.transform(*(obs.cloud_), *(obs.cloud_), new_global_frame);
     }
-    catch (tf2::TransformException& ex)
+    catch (TransformException& ex)
     {
       ROS_ERROR("TF Error attempting to transform an observation from %s to %s: %s", global_frame_.c_str(),
                 new_global_frame.c_str(), ex.what());
@@ -136,10 +133,8 @@ void ObservationBuffer::bufferCloud(const sensor_msgs::PointCloud2& cloud)
 
     sensor_msgs::PointCloud2 global_frame_cloud;
 
-    // Transform PointCloud2 explicitly to avoid tf2::toMsg overload resolution issues.
-    const geometry_msgs::TransformStamped cloud_transform = tf2_buffer_.lookupTransform(
-        global_frame_, cloud.header.frame_id, cloud.header.stamp, ros::Duration(tf_tolerance_));
-    tf2::doTransform(cloud, global_frame_cloud, cloud_transform);
+    // transform the point cloud
+    tf2_buffer_.transform(cloud, global_frame_cloud, global_frame_);
     global_frame_cloud.header.stamp = cloud.header.stamp;
 
     // now we need to remove observations from the cloud that are below or above our height thresholds
@@ -177,7 +172,7 @@ void ObservationBuffer::bufferCloud(const sensor_msgs::PointCloud2& cloud)
     observation_cloud.header.stamp = cloud.header.stamp;
     observation_cloud.header.frame_id = global_frame_cloud.header.frame_id;
   }
-  catch (tf2::TransformException& ex)
+  catch (TransformException& ex)
   {
     // if an exception occurs, we need to remove the empty observation from the list
     observation_list_.pop_front();
@@ -253,3 +248,4 @@ void ObservationBuffer::resetLastUpdated()
   last_updated_ = ros::Time::now();
 }
 }  // namespace costmap_2d
+

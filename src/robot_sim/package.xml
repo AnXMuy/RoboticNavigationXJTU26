@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>robot_sim</name>
+  <version>0.0.1</version>
+  <description>Experiment 3 Gazebo robot and mapping world.</description>
+
+  <maintainer email="group12@example.com">Group12</maintainer>
+  <license>Apache-2.0</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <depend>gazebo_plugins</depend>
+  <depend>gazebo_ros</depend>
+  <depend>robot_state_publisher</depend>
+  <depend>urdf</depend>
+  <depend>xacro</depend>
+</package>

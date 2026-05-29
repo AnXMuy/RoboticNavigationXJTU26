@@ -133,27 +133,22 @@ namespace ydlidar
           {
             // return s;
           }
-          printf("[YDLIDAR DEBUG] Thread [0x%llX] ready to cancel[%d]\n",
-                 static_cast<unsigned long long>(_handle), s);
+          printf("[YDLIDAR DEBUG] Thread [0x%X] ready to cancel[%d]\n", _handle, s);
           s = pthread_join((pthread_t)(_handle), NULL);
-          printf("[YDLIDAR DEBUG] Thread [0x%llX] ready to cancel[%d] time[%u]\n",
-                 static_cast<unsigned long long>(_handle), s, getms() - t);
+          printf("[YDLIDAR DEBUG] Thread [0x%X] ready to cancel[%d] time[%u]\n",
+            _handle, s, getms() - t);
           if (ESRCH == s)
           {
-            printf("[YDLIDAR] Thread [0x%llX] has been canceled in other thread\n",
-                   static_cast<unsigned long long>(_handle));
+            printf("[YDLIDAR] Thread [0x%X] has been canceled in other thread\n", _handle);
             return s;
           }
           if (s != 0)
           {
-            fprintf(stderr,
-                    "[YDLIDAR] An error occurred while thread[0x%llX] cancelled!\n",
-                    static_cast<unsigned long long>(_handle));
+            fprintf(stderr, "[YDLIDAR] An error occurred while thread[0x%X] cancelled!\n", _handle);
             return s;
           }
 
-          printf("[YDLIDAR] Thread [0x%llX] has been canceled\n",
-                 static_cast<unsigned long long>(_handle));
+          printf("[YDLIDAR] Thread [0x%X] has been canceled\n", _handle);
           _handle = 0;
 #endif
           return 0;

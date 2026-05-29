@@ -1,0 +1,5 @@
+<?xml version="1.0"?>
+<launch>
+  <node pkg="plumbing_pub_sub" type="demo01_pub_node" name="pub_node" output="screen" />
+  <node pkg="plumbing_pub_sub" type="demo02_sub_node" name="sub_node" output="screen" />
+</launch>

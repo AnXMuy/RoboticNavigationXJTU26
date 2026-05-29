@@ -36,12 +36,6 @@
 #include "ETLidarDriver.h"
 #include "GSLidarDriver.h"
 #include "SDMLidarDriver.h"
-#ifdef SDK_CMD_STARTSCAN
-#undef SDK_CMD_STARTSCAN
-#endif
-#ifdef SDK_CMD_STOPSCAN
-#undef SDK_CMD_STOPSCAN
-#endif
 #include "DTSLidarDriver.h"
 
 using namespace std;
@@ -1370,8 +1364,7 @@ bool CYdLidar::getDeviceHealth()
     {
       fprintf(stderr,
               "[YDLIDAR] Error, YDLidar internal error[0x%X] detected. "
-              "Please reboot the device to retry.\n",
-              static_cast<unsigned int>(healthinfo.error_code));
+              "Please reboot the device to retry.\n", healthinfo.error_code);
       return false;
     }
     else

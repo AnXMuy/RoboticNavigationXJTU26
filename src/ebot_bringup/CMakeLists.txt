@@ -5,6 +5,6 @@ find_package(catkin REQUIRED)
 
 catkin_package()
 
-install(DIRECTORY launch config maps
+install(DIRECTORY launch maps param
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )

@@ -1,0 +1,7 @@
+<?xml version="1.0" ?>
+<!-- 小车底盘添加雷达 -->
+<robot name="vehicle_laser" xmlns:xacro="http://wiki.ros.org/xacro">
+
+
+</robot>
+

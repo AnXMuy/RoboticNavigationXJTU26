@@ -8,4 +8,9 @@
         type="static_transform_publisher"
         name="base_footprint_to_base_link"
         args="0 0 0 0 0 0 $(arg base_footprint_frame) $(arg base_link_frame)" />
+
+  <node pkg="tf2_ros"
+        type="static_transform_publisher"
+        name="base_footprint_to_laser_frame"
+        args="0.0 0.0 0.20 0.0 0.0 0.0 $(arg base_footprint_frame) laser_frame" />
 </launch>
