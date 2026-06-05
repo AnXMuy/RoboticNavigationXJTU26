@@ -11,7 +11,17 @@
                   <color rgba="1 1 1 1"/>
             </material>
         </visual>
-    </link>   
+        <!-- 前方指示箭头 (小红球) -->
+        <visual>
+             <origin xyz="0.20 0 0.04" rpy="0 0 0" />
+             <geometry>
+                  <sphere radius="0.02"/>
+            </geometry>
+            <material name="red">
+                  <color rgba="1 0 0 1"/>
+            </material>
+        </visual>
+    </link>
 
     <joint name="left_wheel_joint" type="continuous">
         <origin xyz="0 0.08 0.0325" rpy="1.57 0 0"/>
@@ -51,7 +61,7 @@
         </visual>
     </link>
 
-      <joint name="left_front_joint" type="continuous">
+    <joint name="left_front_joint" type="continuous">
         <origin xyz="0.14 0.08 0.0325" rpy="1.57 0 0"/>
         <parent link="base_link"/>
         <child link="left_front_link"/>
@@ -88,6 +98,5 @@
             </material>
         </visual>
     </link>
-
 
 </robot>
