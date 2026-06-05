@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<launch>
+  <arg name="odom_frame" default="odom"/>
+  <arg name="base_frame" default="base_footprint"/>
+  <arg name="cmd_angular_is_steering" default="true"/>
+
+  <param name="robot_description"
+         command="$(find xacro)/xacro $(find vehicle_sim)/urdf/vehicle_top.urdf.xacro" />
+
+  <node pkg="joint_state_publisher" type="joint_state_publisher"
+        name="joint_state_publisher" output="screen" />
+  <node pkg="robot_state_publisher" type="robot_state_publisher"
+        name="robot_state_publisher" output="screen" />
+
+  <node pkg="vehicle_sim" type="vehicle_sim.py"
+        name="vehicle_sim_node" output="screen">
+    <param name="odom_frame" value="$(arg odom_frame)" />
+    <param name="base_frame" value="$(arg base_frame)" />
+    <param name="cmd_angular_is_steering" value="$(arg cmd_angular_is_steering)" />
+    <param name="wheel_base" value="0.313" />
+    <param name="max_steering_angle" value="0.523599" />
+  </node>
+
+  <node pkg="rviz" type="rviz" name="rviz" />
+</launch>
