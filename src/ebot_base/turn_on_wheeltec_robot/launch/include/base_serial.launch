@@ -15,10 +15,15 @@
     <param name="gyro_frame_id"      type="string" value="gyro_link"/> 
 
     <!-- 里程计修正参数，对来自运动底盘的速度信息进行手动修正 -->
-    <param name="odom_x_scale"      type="double" value="-1.0"/> 
-    <param name="odom_y_scale"      type="double" value="-1.0"/> 
-    <param name="odom_z_scale_positive"      type="double" value="-1.0"/> 
-    <param name="odom_z_scale_negative"      type="double" value="-1.0"/> 
+    <param name="odom_x_scale"      type="double" value="1.0"/>
+    <param name="odom_y_scale"      type="double" value="1.0"/>
+    <param name="odom_z_scale_positive"      type="double" value="-1.0"/>
+    <param name="odom_z_scale_negative"      type="double" value="-1.0"/>
+
+    <!-- 阿克曼车型里程计参数 -->
+    <param name="odom_angular_z_is_steering" type="bool"   value="true"/>
+    <param name="wheel_base"                 type="double" value="0.313"/>
+    <param name="max_steering_angle"         type="double" value="0.523599"/>
 
     <!-- 如果开启了平滑功能，则订阅平滑速度 -->
     <remap if="$(arg smoother)" from="cmd_vel" to="smoother_cmd_vel"/>

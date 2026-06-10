@@ -237,7 +237,6 @@ void turn_on_robot::Publish_Odom()
     odom_trans.transform.rotation = odom_quat;
  
     //send the transform
-    tf::TransformBroadcaster odom_broadcaster_;
     odom_broadcaster_.sendTransform(odom_trans);
 
     ////next, we'll publish the odometry message over ROS

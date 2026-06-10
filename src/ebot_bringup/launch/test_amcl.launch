@@ -2,10 +2,6 @@
 <launch>
   <arg name="map" default="nav.yaml"/>
 
-  <!-- 加载机器人模型 -->
-  <param name="robot_description" textfile="$(find ebot_description)/urdf/mini_akm_robot.urdf"/>
-  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
-
   <node name="map_server"
         pkg="map_server"
         type="map_server"

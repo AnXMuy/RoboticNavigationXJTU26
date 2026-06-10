@@ -151,7 +151,8 @@ class turn_on_robot
 		void radar_callback(const sensor_msgs::Range::ConstPtr  &msg);              
 		void chassis_callback(const geometry_msgs::TwistStamped::ConstPtr &msg);
 		void pedestrain_callback(const std_msgs::Int8::ConstPtr &msg);
-		ros::Publisher odom_publisher, imu_publisher, voltage_publisher,chassis_publisher; //Initialize the topic publisher //初始化话题发布者
+		ros::Publisher odom_publisher, imu_publisher, voltage_publisher,chassis_publisher; //Initialize the topic publisher
+		tf::TransformBroadcaster odom_broadcaster_; //初始化话题发布者
 		void Publish_Chassis();
 		void Publish_Odom();      //Pub the speedometer topic //发布里程计话题
 		void Publish_ImuSensor(); //Pub the IMU sensor topic //发布IMU传感器话题
