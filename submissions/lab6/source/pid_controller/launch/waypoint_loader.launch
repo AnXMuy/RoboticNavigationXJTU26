@@ -1,9 +1,0 @@
-<?xml version="1.0"?>
-<launch>
-    <arg name="path_file" default="$(find pid_controller)/waypoints/circle.csv" />
-    <arg name="velocity_kmph" default="1.62" />
-    <node pkg="pid_controller" type="waypoint_loader.py" name="waypoint_loader">
-        <param name="path" value="$(arg path_file)" />
-        <param name="velocity" value="$(arg velocity_kmph)" />
-    </node>
-</launch>

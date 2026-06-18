@@ -1,7 +1,0 @@
-<launch>
-  <node pkg="plumbing_server_client" type="addints_server.py"
-        name="addints_server_py" output="screen" />
-
-  <node pkg="plumbing_server_client" type="addints_client.py"
-        name="addints_client_py" output="screen" args="10 20" />
-</launch>

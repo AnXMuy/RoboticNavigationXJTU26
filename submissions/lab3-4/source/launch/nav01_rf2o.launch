@@ -1,9 +1,0 @@
-<?xml version="1.0"?>
-<launch>
-  <node pkg="rf2o_laser_odometry"
-        type="rf2o_laser_odometry_node"
-        name="rf2o_laser_odometry"
-        output="screen">
-    <rosparam command="load" file="$(find ebot_bringup)/param/rf2o.yaml"/>
-  </node>
-</launch>

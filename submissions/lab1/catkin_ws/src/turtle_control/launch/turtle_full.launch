@@ -1,5 +1,0 @@
-<launch>
-  <node pkg="turtlesim" type="turtlesim_node" name="turtlesim_node" output="screen" />
-  <node pkg="turtle_control" type="circle_pub.py" name="circle_pub" output="screen" />
-  <node pkg="turtle_control" type="pose_sub.py" name="pose_sub" output="screen" />
-</launch>
